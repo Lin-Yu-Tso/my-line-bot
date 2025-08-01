@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -11,6 +12,10 @@ LINE_CHANNEL_SECRET = "522bd756eb29e25d6c50985a8e4513a0"
 
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
+
+# 讀取關鍵字對應表
+with open("keywords.json", "r", encoding="utf-8") as f:
+    keyword_rules = json.load(f)
 
 @app.route("/", methods=['GET'])
 def home():
@@ -34,22 +39,34 @@ def callback():
 # 當使用者傳訊息時，回覆相同內容
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    user_message = event.message.text
+    user_msg = event.message.text.strip().lower()
+    reply = None
+    #user_message = event.message.text
 
     # 設定關鍵字回覆規則
-    if any(word in user_msg for word in ["hello", "嗨", "你好", "こんにちは"]):
+    '''if any(word in user_message for word in ["hello", "嗨", "你好", "こんにちは"]):
         reply_text = "Hi~ 你好！👋"
 
-    elif any(word in user_msg for word in ["bye", "掰掰", "再見", "bye bye"]):
+    elif any(word in user_message for word in ["bye", "掰掰", "再見", "bye bye"]):
         reply_text = "掰掰，下次見！👋"
 
     else:
         reply_text = f"我還聽不懂{user_message}，請跟我爸爸說！"
-
-
+    '''
+    # 根據關鍵字規則回覆
+    for rule in keyword_rules:
+        if any(word in user_msg for word in rule["keywords"]):
+            reply = rule["reply"]
+            break
+    
+    # 如果沒匹配到任何關鍵字
+    if not reply:
+        reply = f"我還聽不懂「{user_msg}」，請跟我爸爸說！"
+    
+    # 回覆訊息
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=reply_text)
+        TextSendMessage(text=reply)
     )
 
 if __name__ == "__main__":
