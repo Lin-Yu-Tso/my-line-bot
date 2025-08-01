@@ -1,5 +1,6 @@
 import json
 import os
+import difflib
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -53,6 +54,9 @@ def handle_message(event):
     print(f"📩 收到訊息: {user_msg}")
     #user_message = event.message.text
 
+    # 設定相似度閾值
+    SIMILARITY_THRESHOLD = 0.6
+
     # 設定關鍵字回覆規則
     '''if any(word in user_message for word in ["hello", "嗨", "你好", "こんにちは"]):
         reply_text = "Hi~ 你好！👋"
@@ -64,11 +68,22 @@ def handle_message(event):
         reply_text = f"我還聽不懂{user_message}，請跟我爸爸說！"
     '''
     # 根據關鍵字規則回覆
-    for key, rule in keyword_rules.items():
+    '''for key, rule in keyword_rules.items():
         if isinstance(rule, dict) and "keywords" in rule and isinstance(rule["keywords"], list):
             if any(word in user_msg for word in rule["keywords"]):
                 reply = rule.get("reply", "🤖 沒有定義回覆")
-                break
+                break'''
+    
+    # 根據關鍵字規則回覆（支援模糊比對）
+    for key, rule in keyword_rules.items():
+        if isinstance(rule, dict) and "keywords" in rule and isinstance(rule["keywords"], list):
+            for word in rule["keywords"]:
+                similarity = difflib.SequenceMatcher(None, user_msg, word.lower()).ratio()
+                if similarity >= SIMILARITY_THRESHOLD or word in user_msg:
+                    reply = rule.get("reply", "🤖 沒有定義回覆")
+                    break
+        if reply:
+            break
     
     # 如果沒匹配到任何關鍵字
     if not reply:
