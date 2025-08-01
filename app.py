@@ -35,7 +35,18 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_message = event.message.text
-    reply_text = f"你剛剛說：{user_message}"
+
+    # 設定關鍵字回覆規則
+    if any(word in user_msg for word in ["hello", "嗨", "你好", "こんにちは"]):
+        reply_text = "Hi~ 你好！👋"
+
+    elif any(word in user_msg for word in ["bye", "掰掰", "再見", "bye bye"]):
+        reply_text = "掰掰，下次見！👋"
+
+    else:
+        reply_text = f"我還聽不懂{user_message}，請跟我爸爸說！"
+
+
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=reply_text)
