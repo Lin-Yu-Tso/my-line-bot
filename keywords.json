@@ -1,10 +1,22 @@
 {
     "greetings": {
-      "keywords": ["hello", "hi", "嗨", "哈囉", "こんにちは"],
-      "reply": "Hi~ 你好！👋"
+        "keywords": ["hello", "hi", "嗨", "哈囉", "こんにちは"],
+        "reply": "Hi~ 你好！👋"
     },
     "goodbye": {
-      "keywords": ["bye", "掰掰", "再見", "bye bye"],
-      "reply": "掰掰，下次見！👋"
+        "keywords": ["bye", "掰掰", "再見", "bye bye"],
+        "reply": "掰掰，下次見！👋"
+    },
+    "weather": {
+        "keywords": ["天氣", "氣象", "今天天氣", "外面天氣"],
+        "reply": "我還不會查天氣，不過可以陪你聊天 ☁️"
+    },
+    "hungry": {
+        "keywords": ["餓了", "肚子餓", "晚餐吃什麼", "午餐吃什麼"],
+        "reply": "我也餓了，要不要一起吃點東西？🍔"
+    },
+    "joke": {
+        "keywords": ["笑話", "講個笑話", "逗我笑"],
+        "reply": "這是一個機器人專用笑話：010101 = 哈哈哈 🤖"
     }
 }
