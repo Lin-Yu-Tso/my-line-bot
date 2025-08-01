@@ -16,7 +16,7 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 # 讀取關鍵字對應表
-file_path = os.path.join(os.path.dirname(__file__), "keywords.json")
+'''file_path = os.path.join(os.path.dirname(__file__), "keywords.json")
 
 with open(file_path, "r", encoding="utf-8") as f:
     keyword_rules = json.load(f)
@@ -26,6 +26,7 @@ if not isinstance(keyword_rules, dict):
     keyword_rules = {}
 else:
     print("✅ JSON 載入成功:", keyword_rules)
+'''
 
 @app.route("/", methods=['GET'])
 def home():
@@ -56,6 +57,15 @@ def handle_message(event):
 
     # 設定相似度閾值
     SIMILARITY_THRESHOLD = 0.6
+
+    # 🔹 每次讀取最新的 keywords.json
+    file_path = os.path.join(os.path.dirname(__file__), "keywords.json")
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            keyword_rules = json.load(f)
+    except Exception as e:
+        keyword_rules = {}
+        print(f"❌ 讀取 keywords.json 失敗：{e}")
 
     # 設定關鍵字回覆規則
     '''if any(word in user_message for word in ["hello", "嗨", "你好", "こんにちは"]):
