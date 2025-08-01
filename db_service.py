@@ -1,6 +1,7 @@
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
+from collections import defaultdict
 
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -12,7 +13,12 @@ def get_keywords_from_db():
         response = supabase.table("keyword_rules").select("*").execute()
         if not response.data:
             return []
-        return [{"keywords": [r["keyword"]], "reply": r["reply"]} for r in response.data]
+        
+        grouped = defaultdict(list)
+        for r in response.data:
+            grouped[r["reply"]].append(r["keyword"].strip().lower())
+        
+        return [{"keywords": words, "reply": reply} for reply, words in grouped.items()]
     except Exception as e:
         print(f"❌ 資料庫讀取失敗：{e}")
         return []
