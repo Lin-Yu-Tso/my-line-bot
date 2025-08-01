@@ -1,4 +1,5 @@
 import json
+import os
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -14,8 +15,16 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 # 讀取關鍵字對應表
-with open("keywords.json", "r", encoding="utf-8") as f:
+file_path = os.path.join(os.path.dirname(__file__), "keywords.json")
+
+with open(file_path, "r", encoding="utf-8") as f:
     keyword_rules = json.load(f)
+
+if not isinstance(keyword_rules, dict):
+    print("⚠️ 讀取 keywords.json 失敗，資料不是 dict:", type(keyword_rules))
+    keyword_rules = {}
+else:
+    print("✅ JSON 載入成功:", keyword_rules)
 
 @app.route("/", methods=['GET'])
 def home():
@@ -41,6 +50,7 @@ def callback():
 def handle_message(event):
     user_msg = event.message.text.strip().lower()
     reply = None
+    print(f"📩 收到訊息: {user_msg}")
     #user_message = event.message.text
 
     # 設定關鍵字回覆規則
@@ -54,10 +64,11 @@ def handle_message(event):
         reply_text = f"我還聽不懂{user_message}，請跟我爸爸說！"
     '''
     # 根據關鍵字規則回覆
-    for rule in keyword_rules:
-        if any(word in user_msg for word in rule["keywords"]):
-            reply = rule["reply"]
-            break
+    for key, rule in keyword_rules.items():
+        if isinstance(rule, dict) and "keywords" in rule and isinstance(rule["keywords"], list):
+            if any(word in user_msg for word in rule["keywords"]):
+                reply = rule.get("reply", "🤖 沒有定義回覆")
+                break
     
     # 如果沒匹配到任何關鍵字
     if not reply:
